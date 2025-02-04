@@ -14,7 +14,7 @@ function setup() {
 }
 
 function draw() {
-  background(255);
+  background(100, 0, 0);
 
   //stroke(210, 210, 210);
 
