@@ -60,6 +60,7 @@ function draw() {
   translate(90, 420);
   rotate(angle1);
   text('Total Percipitation (mm)', 0, 0);
+  text('Total Percipitation (mm)', 0, 0);
   pop();
 
   textSize(15);

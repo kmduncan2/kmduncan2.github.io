@@ -16,17 +16,6 @@ function setup() {
 function draw() {
   background(255);
 
-  //stroke(210, 210, 210);
-
-  // var count = 0;
-  // for (var i = 600; i > 160; i -= 50) {
-  //   strokeWeight(3);
-  //   line(160, i, 610, i);
-  //   strokeWeight(0);
-  //   text(count.toString(), 120, i);
-  //   count += 500;
-  // }
-
   var rain = table.getColumn('total_precipitation');
   var year = table.getColumn('Year');
   var country = table.getColumn('Entity');
@@ -35,6 +24,7 @@ function draw() {
 
   var count = 40;
   var check = country[0];
+  text('Country', 30, 185);
   text('Country', 30, 185);
   text(check, 30, 185 + count);
   text('Year', 355, 160);
