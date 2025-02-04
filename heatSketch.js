@@ -25,7 +25,6 @@ function draw() {
   var count = 40;
   var check = country[0];
   text('Country', 30, 185);
-  text('Country', 30, 185);
   text(check, 30, 185 + count);
   text('Year', 355, 160);
 
@@ -93,7 +92,7 @@ function draw() {
   //title
   textSize(15);
   text(
-    'Total Precipitation in Ecuador between 1995 & 2005',
+    'Total Precipitation in 7 Cities Between 1995 & 2005',
     205,
     100,
   );
