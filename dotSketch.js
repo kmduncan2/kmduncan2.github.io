@@ -1,10 +1,10 @@
-let rain_gist =
-  'https://gist.githubusercontent.com/kmduncan2/dd799413efd821151838291ddf4795bc/raw/b9c907b334cd31b4529e6c8179c74e9570c61096/ecuador_rainfall.csv';
+// let rain_gist =
+//   'https://gist.githubusercontent.com/kmduncan2/dd799413efd821151838291ddf4795bc/raw/b9c907b334cd31b4529e6c8179c74e9570c61096/ecuador_rainfall.csv';
 
 let table;
 
 function preload() {
-  table = loadTable(rain_gist, 'csv', 'header');
+  table = loadTable('ecuador_rainfall.csv', 'csv', 'header');
 }
 
 function setup() {
@@ -19,7 +19,7 @@ function draw() {
   stroke(210, 210, 210);
 
   var count = 0;
-  for (var i = 600; i > 160; i -= 50) {
+  for (var i = 600; i > 160; i -= 50) { //creating the lines on the chart
     strokeWeight(3);
     line(160, i, 610, i);
     strokeWeight(0);
@@ -32,8 +32,8 @@ function draw() {
 
   strokeWeight(0);
 
+  //creating the dots
   for (var i = 55; i < 66; i++) {
-    //rect(10, 10+10*i, 20 * mpg[i], 7.5);
     fill(0, 130, 200);
     var help = rain[i];
     help /= -10;
@@ -43,6 +43,7 @@ function draw() {
     text(year[i], 20 * (i + (i - 1)) - 2002, 620);
   }
 
+  //creating the axes
   stroke('black');
   strokeWeight(5);
 
@@ -51,8 +52,6 @@ function draw() {
 
   fill(0, 0, 0);
   strokeWeight(0);
-  //text('y', 145, 145);
-  //text('x', 615, 610);
 
   text('Year', 380, 650);
 

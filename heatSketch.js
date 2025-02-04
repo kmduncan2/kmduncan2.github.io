@@ -14,7 +14,7 @@ function setup() {
 }
 
 function draw() {
-  background(100, 0, 0);
+  background(255);
 
   //stroke(210, 210, 210);
 
@@ -35,7 +35,6 @@ function draw() {
 
   var count = 40;
   var check = country[0];
-  text('Change??????', 10, 200);
   text('Country', 30, 185);
   text(check, 30, 185 + count);
   text('Year', 355, 160);
