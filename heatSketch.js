@@ -1,6 +1,3 @@
-// let rain_gist =
-//   'https://gist.githubusercontent.com/kmduncan2/f83d05fce22dd39d477fbc5e997d8994/raw/151298f0472af7d2064e67cf1e48f9046c4232eb/cities_rainfall.csv';
-
 let table;
 
 function preload() {

@@ -1,6 +1,3 @@
-// let rain_gist =
-//   'https://gist.githubusercontent.com/kmduncan2/dd799413efd821151838291ddf4795bc/raw/b9c907b334cd31b4529e6c8179c74e9570c61096/ecuador_rainfall.csv';
-
 let table;
 
 function preload() {
