@@ -53,7 +53,6 @@ function draw() {
   strokeWeight(0);
 
   text('Year', 380, 650);
-  text('Year', 380, 650);
 
   push();
   let angle1 = radians(270);
