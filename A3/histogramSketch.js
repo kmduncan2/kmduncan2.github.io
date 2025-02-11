@@ -79,18 +79,24 @@ function draw() {
 
   var scale = 2000;
   var sub = 30;
-  for (var i = 2230; i <= 5600; i += 300) {
-    fill(0, 100, 200);
-    strokeWeight(2);
-    rect(160 + sub, 600, 40, bins.get(i) * -15);
-    fill(0);
-    strokeWeight(0);
+    for (var i = 2230; i <= 5600; i += 300) {
     if (scale < 6000) {
       var xpos = 150 + sub * 1.7;
+      strokeWeight(3);
+      stroke(210);
+      line(xpos, 610, xpos, 150);
+      strokeWeight(2);
+      stroke(0);
       line(xpos, 610, xpos, 600);
+      strokeWeight(0);
       text(scale.toString(), xpos, 620);
       scale += 500;
     }
+    fill(0, 100, 200);
+    strokeWeight(2);
+    stroke(0);
+    rect(160 + sub, 600, 40, bins.get(i) * -15);
+    fill(0);
     sub += 40;
   }
 
