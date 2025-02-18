@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A4 Heat Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="mapstyle.css">
+</head>
+<body>
+    <div id="chart-container"></div>
+    <p>I tried to upload my chart to Vizhub but it asked me to pay to make another.</p>
+
+    <script>
+
+        const containerWidth = 830;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 40, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("multiple_cities_rainfall.csv").then(function(data) {
+            // Convert string values to numbers
+            data.forEach(function(d) {
+                d.total_precipitation = +d.total_precipitation;
+            });
+
+            // scale for x axis
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.Year))
+                .range([30, width])
+                .padding(0);
+
+            // const y = d3.scaleLinear()
+            //     .domain(data.map(d => d.Entity)) //d3.max(data, d => d.total_precipitation)
+            //     .nice()
+            //     .range([0, containerHeight]);
+
+            const color = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.total_precipitation)])
+                .range(["rgb(231,254,255)", "rgb(0,105,148)"]);
+
+            // adding title and axis labels
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width/2)
+                .attr("y", -20)
+                .attr("text-anchor", "middle")
+                .text("Rainfall in Multiple Cities between 1995 & 2005");
+
+            // adding bars
+            svg.selectAll(".box")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "box")
+                .attr("x", d => x(d.Year))
+                .attr("width", x.bandwidth())
+                //.attr("y", d => y(d.Entity))
+                //.attr("y", function(d) { return cityscale(d.Entity)})
+                .attr("y", function(d){
+                    if (d.Entity == "Bangladesh"){
+                        return 0;
+                    } else if (d.Entity == "Ecuador") {
+                        return x.bandwidth();
+                    } else if (d.Entity == "New Zealand") {
+                        return x.bandwidth() * 2;
+                    } else if (d.Entity == "Papua New Guinea") {
+                        return x.bandwidth() * 3;
+                    } else if (d.Entity == "South Korea") {
+                        return x.bandwidth() * 4;
+                    } else if (d.Entity == "Sudan") {
+                        return x.bandwidth() * 5;
+                    }  else if (d.Entity == "Thailand") {
+                        return x.bandwidth() * 6;
+                    }
+                })
+                .attr("height", x.bandwidth())
+                .style("fill", function(d) { return color(d.total_precipitation)});
+
+        });
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 35)
+                //.attr("text-anchor", "middle")
+                .text("Bangladesh");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 95)
+                //.attr("text-anchor", "middle")
+                .text("Ecuador");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 160)
+                //.attr("text-anchor", "middle")
+                .text("New Zealand");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 215)
+                //.attr("text-anchor", "middle")
+                .text("Papua New Guinea");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 275)
+                //.attr("text-anchor", "middle")
+                .text("South Korea");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 335)
+                //.attr("text-anchor", "middle")
+                .text("Sudan");
+
+        svg.append("text")
+                .attr("class", "city")
+                .attr("x", -80)
+                .attr("y", 395)
+                //.attr("text-anchor", "middle")
+                .text("Thailand");
+    </script>
+</body>
+</html>

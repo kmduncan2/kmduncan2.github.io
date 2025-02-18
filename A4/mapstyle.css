@@ -1,0 +1,19 @@
+/*.bar {
+    fill: rgb(176,224,230);
+}*/
+
+.title {
+    font-family: New Century Schoolbook, TeX Gyre Schola, serif;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/*.city {
+    font-family: New Century Schoolbook, TeX Gyre Schola, serif;
+    font-size: 10px;
+}*/
+
+body {
+    font-family: New Century Schoolbook, TeX Gyre Schola, serif;
+    font-size: 12px;
+}
