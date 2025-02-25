@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A5 Bubble Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="bubblestyle.css">
+</head>
+<h1>Bubble Chart for A5</h1>
+<body>
+    <div id="chart-container"></div>
+    <!-- <a href="https://vizhub.com/kmduncan2/7bdf69fb052746f394c43aee10f1c90d">Plot on Vizhub</a> -->
+
+    <script>
+        const containerWidth = 800;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 40, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("coffee.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Location.Altitude.Average"] = +d["Location.Altitude.Average"];
+                d["Data.Scores.Aroma"] = +d["Data.Scores.Aroma"];
+            });
+
+        // scale for x axis
+        const x = d3
+          .scaleLinear()
+          .domain([0, d3.max(data.map((d) => d["Location.Altitude.Average"]))])
+          .range([0, width]);
+
+        // scale for y axis
+        const y = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Scores.Aroma"]),
+            d3.max(data, (d) => d["Data.Scores.Aroma"]),
+          ])
+          .nice()
+          .range([height, 0]);
+
+        // scale for size
+        const r = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Scores.Flavor"]),
+            d3.max(data, (d) => d["Data.Scores.Flavor"]),
+          ])
+          .range([1, 10]);
+
+        // scale for color
+        const c = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Scores.Acidity"]),
+            d3.max(data, (d) => d["Data.Scores.Acidity"]),
+          ])
+          .range(["rgb(0,191,255)", "rgb(220,20,60)"]);
+
+        // adding x axis
+        svg.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(10));
+
+        // adding y axis
+        svg.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(5));
+
+        //adding title and axis labels
+        svg.append("text")
+            .attr("class", "title")
+            .attr("x", width/2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .text("Coffee Profile Based on Average Altitude");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", width/2)
+            .attr("y", 620)
+            .attr("text-anchor", "middle")
+            .text("Average Altitude of Farm");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", height/-2)
+            .attr("y", -70)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .text("Aroma Rating");
+
+            // adding points
+        svg.selectAll(".point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "point")
+            .attr("cx", d => x(d["Location.Altitude.Average"]))
+            .attr("r", d => r(d["Data.Scores.Flavor"]))
+            .attr("cy", d => y(d["Data.Scores.Aroma"]))
+            .style("stroke-width", "0px")
+            .style("opacity", "0.6")
+            .style("fill", d => c(d["Data.Scores.Acidity"]));
+        });
+    </script>
+</body>
+</html>

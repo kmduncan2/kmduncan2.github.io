@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A5 Line Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="linestyle.css">
+</head>
+<h1>Line Chart for A5</h1>
+<body>
+    <div id="chart-container"></div>
+
+    <script>
+        // used https://d3-graph-gallery.com/graph/line_basic.html and https://d3js.org/d3-time-format as references
+        const containerWidth = 800;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 40, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("neworleansweather.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Date.Full"] = d3.utcParse("%Y-%m-%d")(d["Date.Full"]);
+                d["Data.Wind.Speed"] = +d["Data.Wind.Speed"];
+            });
+
+        // scale for x axis
+        const x = d3
+          .scaleTime()
+          .domain([d3.min(data.map((d) => d["Date.Full"])), d3.max(data.map((d) => d["Date.Full"]))])
+          .range([0, width]);
+
+        // scale for y axis
+        const y = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Wind.Speed"]),
+            d3.max(data, (d) => d["Data.Wind.Speed"]),
+          ])
+          .nice()
+          .range([height, 0]);
+
+        // adding x axis
+        svg.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(11));
+
+        // adding y axis
+        svg.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(5));
+
+        //adding title and axis labels
+        svg.append("text")
+            .attr("class", "title")
+            .attr("x", width/2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .text("Wind Speeds in New Orleans, LA in 2016");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", width/2)
+            .attr("y", 620)
+            .attr("text-anchor", "middle")
+            .text("Date");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", height/-2)
+            .attr("y", -70)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .text("Wind Speed (mph)");
+
+        // adding points
+        svg.append("path")
+            .datum(data)
+            .attr("fill", "none")
+            .attr("stroke", "rgb(0,127,191)")
+            .attr("stroke-width", 2.5)
+            .attr("d", d3.line()
+                .x(function(d) { return x(d["Date.Full"]) })
+                .y(function(d) { return y(d["Data.Wind.Speed"]) }))
+        });
+    </script>
+</body>
+</html>
