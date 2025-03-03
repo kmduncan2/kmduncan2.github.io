@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A6 Scatter Plot</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="scatterstyle.css">
+</head>
+<body>
+    <h1>Scatterplot for A6</h1>
+    <div id="chart-container"></div>
+    <!-- Reference for color scale: https://d3-graph-gallery.com/graph/custom_color.html -->
+
+    <script>
+        const containerWidth = 1400;
+        const containerHeight = 900;
+        const margins = { top: 50, right: 440, bottom: 280, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("mcrSongs.csv").then(function(data) {
+            data.forEach(function(d) {
+                d.TimePlayed = +d.TimePlayed;
+                d.SpotifyStreams = +d.SpotifyStreams;
+            });
+
+
+            const x = d3.scaleLog([d3.min(data, d => d.SpotifyStreams), d3.max(data, d => d.SpotifyStreams)], [0, width]);
+
+            // scale for y axis
+            const y = d3.scaleLinear()
+                .domain([d3.min(data, d => d.TimePlayed), d3.max(data, d => d.TimePlayed)])
+                .nice()
+                .range([height, 0]);
+
+            const color = d3.scaleOrdinal()
+                .domain(["I Brought You My Bullets, You Brought Me Your Love", "Three Cheers for Sweet Revenge", "The Black Parade", "Danger Days", "Conventional Weapons", "Other"])
+                .range(["rgb(166,206,227)", "rgb(31,120,180)", "rgb(178,223,138)", "rgb(51,160,44)", "rgb(251,154,153)", "rgb(227,26,28)"])
+
+            svg.append("g")
+              .attr("class", "legendQuant")
+              .attr("transform", "translate(780,0)");
+
+            var legend = d3.legendColor()
+              .title("Album")
+              .titleWidth(100)
+              .scale(color);
+
+            svg.select(".legendQuant")
+              .call(legend);
+          
+        
+
+            // adding x axis
+            svg.append("g")
+                .attr("class", "axis axis-x")
+                .attr("transform", `translate(0, ${height})`)
+                .call(d3.axisBottom(x).ticks(10));
+                //.call(d3.axisBottom(x));
+
+            // adding y axis
+            svg.append("g")
+                .attr("class", "axis axis-y")
+                .call(d3.axisLeft(y).ticks(5));
+
+            // adding title and axis labels
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width/2)
+                .attr("y", -20)
+                .attr("text-anchor", "middle")
+                .text("Times MCR Songs Were Played Live & Streamed On Spotify");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", width/2)
+                .attr("y", 620)
+                .attr("text-anchor", "middle")
+                .text("Streams on Spotify");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", height/-2)
+                .attr("y", -70)
+                .attr("transform", "rotate(-90)")
+                .attr("text-anchor", "middle")
+                .text("Times Played Live");
+
+            // adding points
+            svg.selectAll(".point")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "point")
+                .attr("cx", d => x(d.SpotifyStreams))
+                .attr("r", 10)
+                .attr("cy", d => y(d.TimePlayed))
+                .style("stroke-width", "0px")
+                //.style("opacity", "0.7")
+                .style("fill", function(d) { return color(d.Album)});
+        });
+    </script>
+</body>
+</html>

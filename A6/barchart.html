@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A6 Bar Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="barstyle.css">
+</head>
+<body>
+    <h1>Bar Chart for A6</h1>
+    <div id="chart-container"></div>
+    <!-- <a href="https://vizhub.com/kmduncan2/fcdcfd1d44f246e7b666d75fbac80ead">Plot on Vizhub</a> -->
+    <!-- reference for text rotation: https://css-tricks.com/snippets/css/text-rotation/ -->
+    <!-- reference for color scale: https://observablehq.com/@d3/us-state-choropleth/2 -->
+    <!-- reference for color legend: https://d3-legend.susielu.com/#color-quant -->
+    <!-- data from setlist fm and spotify -->
+
+    <script>
+        const containerWidth = 1000;
+        const containerHeight = 900;
+        const margins = { top: 50, right: 40, bottom: 280, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("threeCheersData.csv").then(function(data) {
+            // Convert string values to numbers
+            data.forEach(function(d) {
+                d.TimePlayed = +d.TimePlayed;
+            });
+
+            // scale for x axis
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.Song))
+                .range([0, width])
+                .padding(0.3);
+
+            // scale for y axis
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data, d => d.TimePlayed)])
+                .nice()
+                .range([height, 0]);
+
+            const color = d3.scaleQuantize([0, d3.max(data, d => d.TimePlayed)], ["rgb(254,229,217)", "rgb(252,174,145)", "rgb(251,106,74)", "rgb(222,45,38)", "rgb(165,15,21)"]).nice();
+
+            svg.append("g")
+              .attr("class", "legendQuant")
+              .attr("transform", "translate(750,40)");
+
+            var legend = d3.legendColor()
+              .labelFormat(d3.format(".0f"))
+              .title("Times Played")
+              .scale(color);
+
+            svg.select(".legendQuant")
+              .call(legend);
+
+            // adding x axis
+            svg.append("g")
+                .attr("class", "axis axis-x")
+                .attr("transform", `translate(0, ${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "end")
+                .attr("transform", "rotate(-45)");
+
+            // adding y axis
+            svg.append("g")
+                .attr("class", "axis axis-y")
+                .call(d3.axisLeft(y).ticks(5));
+
+            // adding title and axis labels
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width/2)
+                .attr("y", -20)
+                .attr("text-anchor", "middle")
+                .text("Times Each Song From Three Cheers for Sweet Revenge Was Played Live");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", width/2)
+                .attr("y", 780)
+                .attr("text-anchor", "middle")
+                .text("Songs");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", height/-2)
+                .attr("y", -70)
+                .attr("transform", "rotate(-90)")
+                .attr("text-anchor", "middle")
+                .text("Times Played Live");
+
+            // adding bars
+            svg.selectAll(".bar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.Song))
+                .attr("width", x.bandwidth())
+                .attr("y", d => y(d.TimePlayed))
+                .attr("height", d => height - y(d.TimePlayed))
+                .style("fill", function(d) { return color(d.TimePlayed)});
+
+            // var quantize = d3.scaleQuantize()
+            //   .domain([0, d3.max(data, d => d.TimePlayed)])
+            //   .range(d3.range(5).map(function(i) { return "q" + i + "-9"; }));
+
+            //var svg = d3.select("svg");
+          
+        
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A6 Diverging Bar Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="barstyle.css">
+</head>
+<body>
+    <h1>Diverging Bar Chart for A6</h1>
+    <div id="chart-container"></div>
+    <!-- <a href="https://vizhub.com/kmduncan2/fcdcfd1d44f246e7b666d75fbac80ead">Plot on Vizhub</a> -->
+    <!-- data from: https://www.ncei.noaa.gov/access/monitoring/climate-at-a-glance/global/time-series/globe/tavg/land_ocean/12/1/1961-1971 -->
+    <!-- bar chart reference: https://observablehq.com/@d3/diverging-bar-chart/2 -->
+
+    <script>
+        const containerWidth = 1150;
+        const containerHeight = 900;
+        const margins = { top: 50, right: 170, bottom: 280, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("globaltemp.csv").then(function(data) {
+            // Convert string values to numbers
+            data.forEach(function(d) {
+                d.Anomaly = +d.Anomaly;
+            });
+
+            // scale for x axis
+            const x = d3.scaleBand()
+                .domain(data.map(d => d.Year))
+                .range([0, width])
+                .padding(0.3);
+
+            // scale for y axis
+            const y = d3.scaleLinear()
+                .domain([-0.20, 0.15])
+                .range([height, 0]);
+
+            const color = d3.scaleQuantize([d3.min(data, d => d.Anomaly), d3.max(data, d => d.Anomaly)], ["rgb(140,81,10)", "rgb(216,179,101)", "rgb(246,232,195)", "rgb(90,180,172)", "rgb(1,102,94)"]);
+
+            svg.append("g")
+              .attr("class", "legendQuant")
+              .attr("transform", "translate(900,40)");
+
+            var legend = d3.legendColor()
+              .labelFormat(d3.format(".2f"))
+              .title("Global Temperature Anomaly")
+              .titleWidth(50)
+              .scale(color);
+
+            svg.select(".legendQuant")
+              .call(legend);
+
+            // adding x axis
+            svg.append("g")
+                .attr("class", "axis axis-x")
+                .attr("transform", `translate(0, ${height})`)
+                .call(d3.axisBottom(x));
+
+            // adding y axis
+            svg.append("g")
+                .attr("class", "axis axis-y")
+                .call(d3.axisLeft(y).ticks(5));
+
+            // adding title and axis labels
+            svg.append("text")
+                .attr("class", "title")
+                .attr("x", width/2)
+                .attr("y", -20)
+                .attr("text-anchor", "middle")
+                .text("Global Temperature Anomalies Between 1961 & 1971");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", width/2)
+                .attr("y", 620)
+                .attr("text-anchor", "middle")
+                .text("Year");
+
+            svg.append("text")
+                .attr("class", "axes")
+                .attr("x", height/-2)
+                .attr("y", -70)
+                .attr("transform", "rotate(-90)")
+                .attr("text-anchor", "middle")
+                .text("Global Temperature Anomaly");
+
+            // adding bars
+            svg.selectAll(".bar")
+                .data(data)
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", d => x(d.Year))
+                .attr("width", x.bandwidth())
+                .attr("y", (d) => y(Math.max(d.Anomaly, 0)))
+                .attr("height", d => Math.abs(y(d.Anomaly) - y(0)))
+                .style("fill", function(d) { return color(d.Anomaly)});
+          
+        
+        });
+    </script>
+</body>
+</html>
