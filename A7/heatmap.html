@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A7 Heat Map</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="mapstyle.css">
+</head>
+<h1>Heat Map for A7</h1>
+<body>
+    <div id="chart-container"></div>
+    <!-- data from: https://corgis-edu.github.io/corgis/csv/weather/ -->
+    <!-- referenced for tooltips: https://d3-graph-gallery.com/graph/interactivity_tooltip.html#template and https://gist.github.com/d3noob/97e51c5be17291f79a27705cef827da2 -->
+    <!-- used Color Brewer and Vis Palette for color palette -->
+
+    <script>
+
+        const containerWidth = 1450;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 140, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        var div = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+        d3.csv("halfyear.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Date.Full"] = d3.utcParse("%Y-%m-%d")(d["Date.Full"]);
+                d["Data.Wind.Speed"] = +d["Data.Wind.Speed"];
+            });
+
+        // scale for x axis
+        const x = d3
+          .scaleTime()
+          .domain([d3.min(data.map((d) => d["Date.Full"])), d3.max(data.map((d) => d["Date.Full"]))])
+          .range([30, width]);
+
+        // scale for y axis
+        const y = d3
+          .scaleOrdinal()
+          .domain(["New Orleans, LA", "Homer, AK", "San Francisco, CA", "Corpus Christi, TX"])
+          //.nice()
+          .range([70, 140, 210, 280]);
+
+        const color = d3.scaleQuantize()
+            .domain([d3.min(data, d => d["Data.Wind.Speed"]), d3.max(data, d => d["Data.Wind.Speed"])])
+            .range(["rgb(252,239,231)","rgb(254,201,197)","rgb(250,159,181)","rgb(247,104,161)","rgb(197,27,138)","rgb(122,1,119)"]);
+
+        svg.append("g")
+          .attr("class", "legendQuant")
+          .attr("transform", "translate(945,0)");
+
+        var legend = d3.legendColor()
+            .labelFormat(d3.format(".0f"))
+            .title("Wind Speed (mph)")
+            .orient('horizontal')
+            .shapeWidth(50)
+            .scale(color);
+
+        svg.select(".legendQuant")
+            .call(legend);
+
+        // var Tooltip = d3.select("#div_template")
+        //     .append("div")
+        //     .style("opacity", 0)
+        //     .attr("class", "tooltip")
+        //     .style("background-color", "white")
+        //     .style("border", "solid")
+        //     .style("border-width", "2px")
+        //     .style("border-radius", "5px")
+        //     .style("padding", "5px");
+
+        // var mouseover = function(d) {
+        //     Tooltip
+        //       .style("opacity", 1)
+        //     d3.select(this)
+        //       .style("stroke", "black")
+        //       .style("opacity", 1)
+        //   }
+        //   var mousemove = function(d) {
+        //     Tooltip
+        //       .html("The exact value of<br>this cell is: " + d["Data.Wind.Speed"])
+        //       .style("left", (d3.pointer(event)[0]+70) + "px")
+        //       .style("top", (d3.pointer(event)[1]) + "px")
+        //   }
+        //   var mouseleave = function(d) {
+        //     Tooltip
+        //       .style("opacity", 0)
+        //     d3.select(this)
+        //       .style("stroke", "none")
+        //       //.style("opacity", 0.8)
+        //   }
+
+        // adding title and axis labels
+        svg.append("text")
+            .attr("class", "title")
+            .attr("x", width/2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .text("Wind Speeds in the US from July - December 2016");
+
+            // adding bars
+        svg.selectAll(".box")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class", "box")
+            .attr("width", 45)
+            .attr("height", 65)
+            .style("fill", function(d){ return color(d["Data.Wind.Speed"]) })
+            .attr("x", function(d) { return x(+d["Date.Full"]); })
+            .attr("y", function(d) { return y(d["Station.Location"]); })
+            .on("mouseover", function(event,d) {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div.html("The exact value of<br>this cell is: " + d["Data.Wind.Speed"])
+                     .style("left", (event.pageX) + "px")
+                     .style("top", (event.pageY - 28) + "px");
+                })
+            .on("mouseout", function(d) {
+                div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+            });
+            // .on("mouseover", mouseover)
+            // .on("mousemove", mousemove)
+            // .on("mouseleave", mouseleave);
+    });
+
+        svg.append("text")
+            .attr("class", "city")
+            .attr("x", -80)
+            .attr("y", 105)
+            .text("New Orleans, LA");
+
+        svg.append("text")
+            .attr("class", "city")
+            .attr("x", -80)
+            .attr("y", 175)
+            .text("Homer, AK");
+
+        svg.append("text")
+            .attr("class", "city")
+            .attr("x", -80)
+            .attr("y", 245)
+            .text("San Francisco, CA");
+
+        svg.append("text")
+            .attr("class", "city")
+            .attr("x", -80)
+            .attr("y", 315)
+            .text("Corpus Christi, TX");
+    </script>
+</body>
+</html>

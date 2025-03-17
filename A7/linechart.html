@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A7 Line Chart</title>
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="linestyle.css">
+</head>
+<h1>Multi-line Chart for A7</h1>
+<body>
+    <div id="chart-container"></div>
+    <!-- data from: https://corgis-edu.github.io/corgis/csv/weather/ -->
+    <!-- referenced: https://d3-graph-gallery.com/graph/line_several_group.html -->
+    <!-- used Colorgorical and Vis Palette for color palette -->
+
+    <script>
+        const containerWidth = 900;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 140, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        d3.csv("multiple_cities_weather.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Date.Full"] = d3.utcParse("%Y-%m-%d")(d["Date.Full"]);
+                d["Data.Wind.Speed"] = +d["Data.Wind.Speed"];
+            });
+
+        const sumstat = d3.group(data, d => d["Station.Location"])
+
+        // scale for x axis
+        const x = d3
+          .scaleTime()
+          .domain([d3.min(data.map((d) => d["Date.Full"])), d3.max(data.map((d) => d["Date.Full"]))])
+          .range([0, width]);
+
+        // scale for y axis
+        const y = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Wind.Speed"]),
+            d3.max(data, (d) => d["Data.Wind.Speed"]),
+          ])
+          .nice()
+          .range([height, 0]);
+
+        const color = d3.scaleOrdinal()
+          .domain(["New Orleans, LA", "Homer, AK", "San Francisco, CA", "Corpus Christi, TX"])
+          .range(["rgb(65,143,51)","rgb(92,186,254)","rgb(201,82,137)","rgb(89,1,133)"]);
+
+        svg.append("g")
+              .attr("class", "legendQuant")
+              .attr("transform", "translate(630,0)");
+
+            var legend = d3.legendColor()
+              .title("Station Location")
+              .scale(color);
+
+            svg.select(".legendQuant")
+              .call(legend);
+
+        // adding x axis
+        svg.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(11));
+
+        // adding y axis
+        svg.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(5));
+
+        //adding title and axis labels
+        svg.append("text")
+            .attr("class", "title")
+            .attr("x", width/2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .text("Wind Speeds US Cities in 2016");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", width/2)
+            .attr("y", 620)
+            .attr("text-anchor", "middle")
+            .text("Date");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", height/-2)
+            .attr("y", -70)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .text("Wind Speed (mph)");
+
+        // adding points
+        svg.selectAll(".line")
+          .data(sumstat)
+          .join("path")
+            .attr("fill", "none")
+            .attr("stroke", function(d){ return color(d[0]) })
+            .attr("stroke-width", 2.3)
+            .attr("d", function(d){
+              return d3.line()
+                .x(function(d) { return x(d["Date.Full"]); })
+                .y(function(d) { return y(d["Data.Wind.Speed"]); })
+                (d[1])
+            });
+        });
+    </script>
+</body>
+</html>

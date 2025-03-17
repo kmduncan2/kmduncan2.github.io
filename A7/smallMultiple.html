@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A7 Small Multiples Line Chart</title>
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <link rel="stylesheet" href="linestyle.css">
+</head>
+<h1>Small Multiples Line Chart for A7</h1>
+<h2>Wind Speeds in US Cities in 2016</h2>
+<body>
+    <div id="chart-container"></div>
+    <!-- data from: https://corgis-edu.github.io/corgis/csv/weather/ -->
+    <!-- referenced: https://d3-graph-gallery.com/graph/line_smallmultiple.html -->
+    <!-- used Colorgorical and Vis Palette for color palette -->
+
+    <style>
+        h2 {
+            text-align: center;
+        }
+    </style>
+
+    <script>
+        const containerWidth = 600;
+        const containerHeight = 400;
+        const margins = {top: 30, right: 0, bottom: 30, left: 50};
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        d3.csv("multiple_cities_weather.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Date.Full"] = d3.utcParse("%Y-%m-%d")(d["Date.Full"]);
+                d["Data.Wind.Speed"] = +d["Data.Wind.Speed"];
+            });
+
+        const sumstat = d3.group(data, d => d["Station.Location"])
+        allKeys = new Set(data.map(d => d["Station.Location"]))
+
+        const svg = d3.select("#chart-container")
+            .selectAll("uniqueChart")
+            .data(sumstat)
+            .enter()
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        // scale for x axis
+        const x = d3
+          .scaleTime()
+          .domain([d3.min(data.map((d) => d["Date.Full"])), d3.max(data.map((d) => d["Date.Full"]))])
+          .range([0, width]);
+
+        // scale for y axis
+        const y = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Data.Wind.Speed"]),
+            d3.max(data, (d) => d["Data.Wind.Speed"]),
+          ])
+          .nice()
+          .range([height, 0]);
+
+        const color = d3.scaleOrdinal()
+          //.domain(["New Orleans, LA", "Homer, AK", "San Francisco, CA", "Corpus Christi, TX"])
+          .domain(allKeys)
+          .range(["rgb(65,143,51)","rgb(92,186,254)","rgb(201,82,137)","rgb(89,1,133)"]);
+
+        svg.append("g")
+              .attr("class", "legendQuant")
+              .attr("transform", "translate(350,0)");
+
+            var legend = d3.legendColor()
+              .title("Station Location")
+              .scale(color);
+
+            svg.select(".legendQuant")
+              .call(legend);
+
+        // adding x axis
+        svg.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(6));
+
+        // adding y axis
+        svg.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(5));
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", width/2)
+            .attr("y", 620)
+            .attr("text-anchor", "middle")
+            .text("Date");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", height/-2)
+            .attr("y", -70)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .text("Wind Speed (mph)");
+
+        //console.log(sumstat);
+
+        // adding points
+        svg//.selectAll(".line")
+          //.data(sumstat)
+          .append("path")
+            .attr("fill", "none")
+            .attr("stroke", function(d){ return color(d[0]) })
+            .attr("stroke-width", 2.3)
+            .attr("d", function(d){
+              return d3.line()
+                .x(function(d) { return x(d["Date.Full"]); })
+                .y(function(d) { return y(d["Data.Wind.Speed"]); })
+                (d[1])
+            });
+        });
+    </script>
+</body>
+</html>
