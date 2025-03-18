@@ -19,6 +19,7 @@
     <style>
         h2 {
             text-align: center;
+            fill: black;
         }
     </style>
 
@@ -73,12 +74,12 @@
               .attr("class", "legendQuant")
               .attr("transform", "translate(350,0)");
 
-            var legend = d3.legendColor()
-              .title("Station Location")
-              .scale(color);
+        var legend = d3.legendColor()
+            .title("Station Location")
+            .scale(color);
 
-            svg.select(".legendQuant")
-              .call(legend);
+        svg.select(".legendQuant")
+            .call(legend);
 
         // adding x axis
         svg.append("g")
