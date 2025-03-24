@@ -50,7 +50,7 @@
                 .style("stroke-width", "3px")
                 .style("stroke", "#91a3b0");
 
-            const node = svg.selectAll("circle")
+            const node = svg.append("g").selectAll("circle")
                 .data(nodes)
                 .join("circle")
                 .attr("r", 10)
@@ -59,7 +59,7 @@
                     div.transition()
                         .duration(200)
                         .style("opacity", .9);
-                    div.html(d.name)
+                    div.html("Name: " + d.name)
                          .style("left", (event.pageX) + "px")
                          .style("top", (event.pageY - 28) + "px");
                 })
