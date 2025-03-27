@@ -54,10 +54,10 @@
               link.target = link.target;
             });
 
-            nodes.forEach((node) => {
-              node.source = node.id;
-              node.name = node.name;
-            });
+            // nodes.forEach((node) => {
+            //   node.source = node.id;
+            //   node.name = node.name;
+            // });
 
 
             const x = d3.scaleBand()
@@ -67,6 +67,14 @@
             const y = d3.scaleBand()
               .domain(links.map(d => d.target))
               .range([0, height]);
+
+            const nodeX = d3.scaleBand()
+              .domain(nodes.map(d => d.id))
+              .range([40, width]);
+
+            const nodeY = d3.scaleBand()
+              .domain(nodes.map(d => d.id))
+              .range([10, height]);
 
             svg.selectAll(".box")
               .data(links)
@@ -97,18 +105,14 @@
             
             function printingy(node){
                 svg.append("text")
-                  .attr("x", -10)
-                  .attr("y", function(d) { return y(+node.source); })
+                  .attr("x", -17)
+                  .attr("y", function(d) { return nodeY(+node.id); })
                   .text(`${node.name}`);
             }
             function printingx(node){
-                let xcoord = x(+node.source);
+                let xcoord = nodeX(+node.id);
                 svg.append("text")
-                  // .attr("x", function(d) { return x(+node.source); })
-                  // .attr("y", 10)
-                  .attr("transform", `translate(0, ${xcoord})`)
-                  .attr("transform", "rotate(-45)")
-                  //.attr("text-anchor", "end")
+                  .attr("transform", `translate(${xcoord}, 0) rotate(-90)`)
                   .text(`${node.name}`);
             }
 
