@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A9 Choropleth</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
+    <script src="https://observablehq.com/@d3/choropleth"></script>
+    <link rel="stylesheet" href="chorostyle.css">
+</head>
+<h1>Choropleth for A9</h1>
+<body>
+    <div id="chart-container"></div>
+    <!-- referenced: https://observablehq.com/@d3/choropleth -->
+    <!--  -->
+
+    <script>
+        //import {Choropleth} from "@d3/choropleth"
+        const containerWidth = 1450;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 140, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", containerWidth)
+            .attr("height", containerHeight)
+            .append("g")
+            .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        chart = Choropleth(unemployment, {
+            id: d => d.id,
+            value: d => d.rate,
+            scale: d3.scaleQuantize,
+            domain: [1, 10],
+            range: d3.schemeBlues[9],
+            title: (f, d) => `${f.properties.name}, ${statemap.get(f.id.slice(0, 2)).properties.name}\n${d?.rate}%`,
+            features: counties,
+            borders: statemesh,
+            width: 975,
+            height: 610
+        })
+
+        poverty = (await FileAttachment("Poverty2023.csv").csv()).map(d => ({...d, attribute: d.Attribute,
+                val: +d.value,
+                id: d.FIPS_Code.padStart(5, '0')}))
+        us = FileAttachment("https://d3js.org/us-10m.v2.json").json()
+        states = topojson.feature(us, us.objects.states)
+        statemap = new Map(states.features.map(d => [d.id, d]))
+        statemesh = topojson.mesh(us, us.objects.states, (a, b) => a !== b)
+
+        function Choropleth(poverty, {
+        } = {}) { 
+            const path = d3.geoPath(projection);
+
+            svg.append("g")
+                .selectAll("path")
+                .data(features.features)
+                .join("path")
+                //.attr("fill", (d, i) => color(V[Im.get(If[i])]))
+                .attr("d", path);
+        }
+    
+    </script>
+</body>
+</html>
