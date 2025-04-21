@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A5 Bubble Chart</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="bubblestyle.css">
+</head>
+<h1>Bubble Chart for A5</h1>
+<body>
+    <div id="chart-container"></div>
+    <!-- data from: https://corgis-edu.github.io/corgis/csv/global_emissions/ -->
+
+    <script>
+        const containerWidth = 1100;
+        const containerHeight = 700;
+        const margins = { top: 50, right: 40, bottom: 80, left: 100 };
+        const width = containerWidth - margins.left - margins.right;
+        const height = containerHeight - margins.top - margins.bottom;
+
+        const svg = d3.select("#chart-container")
+          .append("svg")
+          .attr("width", containerWidth)
+          .attr("height", containerHeight)
+          .append("g")
+          .attr("transform", `translate(${margins.left},${margins.top})`);
+        
+        var div = d3.select("body").append("div")
+          .attr("class", "tooltip")
+          .style("opacity", 0);
+
+        d3.csv("global_emissions.csv").then(function(data) {
+            data.forEach(function(d) {
+                d["Emissions.Production.CO2.Total"] = +d["Emissions.Production.CO2.Total"];
+                //d["Year"] = +d["Year"];
+            });
+
+        const x = d3.scaleBand()
+          .domain(data.map(d => d["Year"]))
+          .range([0, width]);
+
+        const y = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
+            d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
+          ])
+          .nice()
+          .range([height, 0]);
+
+        // scale for size
+        const r = d3
+          .scaleLinear()
+          .domain([
+            d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
+            d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
+          ])
+          .range([1, 10]);
+
+        // scale for color
+        // const c = d3
+        //   .scaleLinear()
+        //   .domain([
+        //     d3.min(data, (d) => d["Data.Scores.Acidity"]),
+        //     d3.max(data, (d) => d["Data.Scores.Acidity"]),
+        //   ])
+        //   .range(["rgb(0,191,255)", "rgb(220,20,60)"]);
+
+        // adding x axis
+        svg.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(10));
+
+        // adding y axis
+        svg.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(5));
+
+        //adding title and axis labels
+        svg.append("text")
+            .attr("class", "title")
+            .attr("x", width/2)
+            .attr("y", -20)
+            .attr("text-anchor", "middle")
+            .text("Carbon Emissions Over the Years");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", width/2)
+            .attr("y", 620)
+            .attr("text-anchor", "middle")
+            .text("Year");
+
+        svg.append("text")
+            .attr("class", "axes")
+            .attr("x", height/-2)
+            .attr("y", -70)
+            .attr("transform", "rotate(-90)")
+            .attr("text-anchor", "middle")
+            .text("Emissions.Production.CO2.Total");
+
+            // adding points
+        svg.selectAll(".point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "point")
+            .attr("cx", d => x(d["Year"]))
+            //.attr("r", d => r(d["Emissions.Production.CO2.Total"]))
+            .attr("cy", d => y(d["Emissions.Production.CO2.Total"]))
+            .attr("r", "7px")
+            .style("stroke-width", "0px")
+            .style("fill", "green")
+            .on("mouseover", function(event,d) {
+                div.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                div.html(d["Country.Name"])
+                     .style("left", (event.pageX) + "px")
+                     .style("top", (event.pageY - 28) + "px");
+                })
+            .on("mouseout", function(d) {
+                div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
+            });
+            //.style("opacity", "0.6")
+            //.style("fill", d => c(d["Data.Scores.Acidity"]));
+        });
+    </script>
+</body>
+</html>
