@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A5 Bubble Chart</title>
+    <title>A10 Bubble Charts</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.25.6/d3-legend.min.js"></script>
     <link rel="stylesheet" href="bubblestyle.css">
 </head>
-<h1>Bubble Chart for A5</h1>
+<h1>Black Hat & White Hat Visualizations for A10</h1>
 <body>
     <div id="chart-container"></div>
+    <div id="chart-container2"></div>
     <!-- data from: https://corgis-edu.github.io/corgis/csv/global_emissions/ -->
+    <!-- colors from ColorBrewer and Viz Palette -->
 
     <script>
         const containerWidth = 1100;
@@ -25,109 +28,205 @@
           .attr("height", containerHeight)
           .append("g")
           .attr("transform", `translate(${margins.left},${margins.top})`);
+        const svg2 = d3.select("#chart-container2")
+          .append("svg")
+          .attr("width", containerWidth)
+          .attr("height", containerHeight)
+          .append("g")
+          .attr("transform", `translate(${margins.left},${margins.top})`);
+
+        // svg2.append('circle')
+        //   .attr('cx', 100)
+        //   .attr('cy', 100)
+        //   .attr('r', 50)
+        //   .attr('stroke', 'black')
+        //   .attr('fill', '#69a3b2');
         
         var div = d3.select("body").append("div")
           .attr("class", "tooltip")
           .style("opacity", 0);
 
-        d3.csv("global_emissions.csv").then(function(data) {
+        d3.csv("sorted_emissions.csv").then(function(data) {
             data.forEach(function(d) {
                 d["Emissions.Production.CO2.Total"] = +d["Emissions.Production.CO2.Total"];
                 //d["Year"] = +d["Year"];
             });
 
-        const x = d3.scaleBand()
-          .domain(data.map(d => d["Year"]))
-          .range([0, width]);
+          const x = d3.scaleBand()
+            .domain(data.map(d => d["Year"]))
+            .range([0, width]);
 
-        const y = d3
-          .scaleLinear()
-          .domain([
-            d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
-            d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
-          ])
-          .nice()
-          .range([height, 0]);
+          const y = d3
+            .scaleLinear()
+            .domain([
+              d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
+              d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
+            ])
+            .nice()
+            .range([height, 0]);
 
-        // scale for size
-        const r = d3
-          .scaleLinear()
-          .domain([
-            d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
-            d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
-          ])
-          .range([1, 10]);
+          // scale for size
+          const r = d3
+            .scaleLinear()
+            .domain([
+              d3.min(data, (d) => d["Emissions.Production.CO2.Total"]),
+              d3.max(data, (d) => d["Emissions.Production.CO2.Total"]),
+            ])
+            .range([1, 10]);
 
-        // scale for color
-        // const c = d3
-        //   .scaleLinear()
-        //   .domain([
-        //     d3.min(data, (d) => d["Data.Scores.Acidity"]),
-        //     d3.max(data, (d) => d["Data.Scores.Acidity"]),
-        //   ])
-        //   .range(["rgb(0,191,255)", "rgb(220,20,60)"]);
+          // scale for color
+          const color = d3.scaleOrdinal()
+            .domain(["China", "India", "Russia", "United States", "Venezuela"])
+            .range(["rgb(228,26,28)","rgb(255,127,0)","rgb(77,175,74)","rgb(55,126,184)","rgb(152,78,163)"]);
 
-        // adding x axis
-        svg.append("g")
+          svg.append("g")
+            .attr("class", "legendQuant")
+            .attr("transform", "translate(40,0)");
+
+          var legend = d3.legendColor()
+            //.title("Country")
+            .scale(color)
+            .shapePadding(5);
+
+          svg.select(".legendQuant")
+            .call(legend);
+
+          const color2 = d3.scaleOrdinal()
+            .domain(["China", "India", "Russia", "United States", "Venezuela"])
+            .range(["rgb(221,241,0)","rgb(250,255,142)","rgb(252,255,54)","rgb(255,225,121)","rgb(255,215,0)","rgb(255,255,51)"]);
+          
+          svg2.append("g")
+            .attr("class", "legendQuant")
+            .attr("transform", "translate(40,0)");
+
+          var legend = d3.legendColor()
+            .title("Place")
+            .scale(color2)
+            .shapePadding(30);
+
+          svg2.select(".legendQuant")
+            .call(legend);
+
+          // adding x axis
+          svg.append("g")
             .attr("class", "axis axis-x")
             .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(x).ticks(10));
+            .call(d3.axisBottom(x).tickValues(["1995", "2000", "2005", "2010", "2015"]));
 
-        // adding y axis
-        svg.append("g")
+          svg2.append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).tickValues(["1992", "2009"]))
+            .style("color", "lavender");
+
+          // adding y axis
+          svg.append("g")
             .attr("class", "axis axis-y")
             .call(d3.axisLeft(y).ticks(5));
 
-        //adding title and axis labels
-        svg.append("text")
+          svg2.append("g")
+            .attr("class", "axis axis-y")
+            .call(d3.axisLeft(y).ticks(20))
+            .style("color", "limegreen");
+
+          //adding title and axis labels
+          svg.append("text")
             .attr("class", "title")
             .attr("x", width/2)
             .attr("y", -20)
             .attr("text-anchor", "middle")
             .text("Carbon Emissions Over the Years");
 
-        svg.append("text")
-            .attr("class", "axes")
+          svg2.append("text")
+            .attr("class", "title")
             .attr("x", width/2)
-            .attr("y", 620)
+            .attr("y", -20)
             .attr("text-anchor", "middle")
-            .text("Year");
+            .text("CLIMATE CHANGE IS A HOAX: Emissions Stay the Same Over Time");
 
-        svg.append("text")
-            .attr("class", "axes")
-            .attr("x", height/-2)
-            .attr("y", -70)
-            .attr("transform", "rotate(-90)")
-            .attr("text-anchor", "middle")
-            .text("Emissions.Production.CO2.Total");
+          svg.append("text")
+              .attr("class", "axes")
+              .attr("x", width/2)
+              .attr("y", 620)
+              .attr("text-anchor", "middle")
+              .text("Year");
 
-            // adding points
-        svg.selectAll(".point")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("class", "point")
-            .attr("cx", d => x(d["Year"]))
-            //.attr("r", d => r(d["Emissions.Production.CO2.Total"]))
-            .attr("cy", d => y(d["Emissions.Production.CO2.Total"]))
-            .attr("r", "7px")
-            .style("stroke-width", "0px")
-            .style("fill", "green")
-            .on("mouseover", function(event,d) {
-                div.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                div.html(d["Country.Name"])
-                     .style("left", (event.pageX) + "px")
-                     .style("top", (event.pageY - 28) + "px");
-                })
-            .on("mouseout", function(d) {
-                div.transition()
-                  .duration(500)
-                  .style("opacity", 0);
-            });
-            //.style("opacity", "0.6")
-            //.style("fill", d => c(d["Data.Scores.Acidity"]));
+          svg2.append("text")
+              .attr("class", "axes")
+              .attr("x", width/2)
+              .attr("y", 620)
+              .attr("text-anchor", "middle")
+              .text("Month");
+
+          svg.append("text")
+              .attr("class", "axes")
+              .attr("x", height/-2)
+              .attr("y", -70)
+              .attr("transform", "rotate(-90)")
+              .attr("text-anchor", "middle")
+              .text("Total CO2 Emissions Produced (kilotons)");
+          
+          svg2.append("text")
+              .attr("class", "axes")
+              .attr("x", height/-2)
+              .attr("y", -70)
+              .attr("transform", "rotate(-90)")
+              .attr("text-anchor", "middle")
+              .text("Amuont");
+
+              // adding points
+          svg.selectAll(".point")
+              .data(data)
+              .enter()
+              .append("circle")
+              .attr("class", "point")
+              .attr("cx", d => x(d["Year"]))
+              //.attr("r", d => r(d["Emissions.Production.CO2.Total"]))
+              .attr("cy", d => y(d["Emissions.Production.CO2.Total"]))
+              .attr("r", "7px")
+              .style("stroke-width", "0px")
+              .style("fill", d => color(d["Country.Name"]))
+              .on("mouseover", function(event,d) {
+                  div.transition()
+                      .duration(200)
+                      .style("opacity", .9);
+                  div.html(d["Country.Name"] + ": " + d["Emissions.Production.CO2.Total"])
+                      .style("left", (event.pageX) + "px")
+                      .style("top", (event.pageY - 28) + "px");
+                  })
+              .on("mouseout", function(d) {
+                  div.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+              });
+
+          svg2.selectAll(".point")
+              .data(data)
+              .enter()
+              .append("circle")
+              .attr("class", "point")
+              .attr("cx", d => x(d["Year"]))
+              //.attr("r", d => r(d["Emissions.Production.CO2.Total"]))
+              .attr("cy", d => y(d["Emissions.Production.CO2.Total"]))
+              .attr("r", "10px")
+              .style("stroke-width", "4px")
+              .style("stroke", "red")
+              .style("fill", d => color2(d["Country.Name"]))
+              .on("mouseover", function(event,d) {
+                  div.transition()
+                      .duration(200)
+                      .style("opacity", .9);
+                  div.html("[insert helpful info here (REMEMBER TO DO THIS)]")
+                      .style("left", (event.pageX) + "px")
+                      .style("top", (event.pageY - 28) + "px");
+                  })
+              // .on("mouseout", function(d) {
+              //     div.transition()
+              //       .duration(500)
+              //       .style("opacity", 0);
+              // });
+              //.style("opacity", "0.6")
+              //.style("fill", d => c(d["Data.Scores.Acidity"]));
         });
     </script>
 </body>
