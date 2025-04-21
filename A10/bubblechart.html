@@ -92,7 +92,7 @@
             .call(legend);
 
           const color2 = d3.scaleOrdinal()
-            .domain(["China", "India", "Russia", "United States", "Venezuela"])
+            .domain(["India", "Venezuela", "Russia", "China", "United States"])
             .range(["rgb(221,241,0)","rgb(250,255,142)","rgb(252,255,54)","rgb(255,225,121)","rgb(255,215,0)","rgb(255,255,51)"]);
           
           svg2.append("g")
@@ -173,6 +173,11 @@
               .attr("transform", "rotate(-90)")
               .attr("text-anchor", "middle")
               .text("Amuont");
+          
+          svg.append("text")
+              .attr("x", 0)
+              .attr("y", 640)
+              .text("Data sourced from CORGIS Datasets Project");
 
               // adding points
           svg.selectAll(".point")
@@ -219,7 +224,7 @@
                   div.html("[insert helpful info here (REMEMBER TO DO THIS)]")
                       .style("left", (event.pageX) + "px")
                       .style("top", (event.pageY - 28) + "px");
-                  })
+                  });
               // .on("mouseout", function(d) {
               //     div.transition()
               //       .duration(500)
@@ -229,5 +234,34 @@
               //.style("fill", d => c(d["Data.Scores.Acidity"]));
         });
     </script>
+    <b>Black Hat Visualization<br/></b>
+    The bottom visualization is misleading for several reasons. For one, the title is very biased and worded in a click bait esque way 
+    (the all caps contributes to this feeling). The x-axis is labeled incorrectly, the axis represents years, not months. There 
+    are also too few ticks on the x-axis (there is only two). The ticks are also very hard to see on a white background. You wouldn't
+    know the ticks were there unless someone told you. The y-axis is labeled very vaugely so it is hard to tell what the values 
+    represent. Also, there are far too many ticks on this axis, it is very crowded. The color also isn't a great choice, there is 
+    no reason for the text to be green. As for the data points, the radius is too large, they overlap a lot and obscure some of the 
+    ticks. The stroke makes the overlap even worse and makes it much harder to discern the colors. The red stroke also sticks out a lot
+    which draws your eye to it and not the data. The colors for each country are also way too similar, it is hard to tell them apart
+    even without the red border. The color legend is also labeled poorly. There could be a better more descriptive title,
+    or no title at all as it is very clear that they are countires. The label is also too spread out, it takes up a lot of space and the 
+    dead space between the colors makes it harder to tell them apart. The countries in the legend are not sorted either, which
+    makes finding a specific country more difficult. Finally, the tooltips are incomplete and don't fade away when
+    the user moves the mouse off a point.<br/>
+    <b>White Hat Visualization<br/></b>
+    The top visualization is an improvement on the second visualization. The title is more neutral and gives the reader a better
+    idea what the data is about. The x-axis is labeled correctly and the axis has an appropriate amount of ticks (enough to 
+    see how much time is passing but not so many that it becomes cluttered). The y-axis is also properly labeled and now contains units.
+    This makes it clear what the axis represents and an idea of the scope of the numbers. There is also a more appropriate number
+    of ticks on this axis now. Further, the text for both axes is black which makes them much easier to read and doesn't distract
+    the reader from the data points. Moving on to the data points, the radius is smaller which helps with overlap so the points can 
+    be more easily differentiated from one another. There is also no stroke on these circles which I think makes it look neater.
+    The color scale is also much nicer in this example. It is easy to tell each color apart, so you can see trends more easily.
+    The color legend on this one has no title, which I think is more fitting because there is already a lot of data and it is easy
+    to tell that these are countries so not including a title reduces clutter. The legend is also much more compact which makes it
+    appear neater and makes it easier to compare colors. The legend here is sorted alphabetically which makes it easier to read 
+    and find certain countries. Finally, the tooltips contain useful, relevant information which adds to the reader's 
+    understanding of the chart. The tooltips also fade away when the mouse moves away which is nicer than when they stick
+    around because they won't obscure any of the data for longer than necessary.
 </body>
 </html>
